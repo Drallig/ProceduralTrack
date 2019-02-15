@@ -6,6 +6,7 @@ using UnityEngine;
 public class MeshGenerator : MonoBehaviour
 {
     public int meshSize = 20;
+    public float scale = 1;
 
     Mesh mesh;
 
@@ -21,7 +22,8 @@ public class MeshGenerator : MonoBehaviour
 
         CreateShape();
         UpdateMesh();
-	}
+
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -33,22 +35,39 @@ public class MeshGenerator : MonoBehaviour
     {
         float ct = Time.deltaTime;
         verts = new Vector3[(meshSize + 1) * (meshSize + 1)];
-        float r = Random.value;
-        int i = 0;
-        for (int z = 0; z <= meshSize * 10; z+=10)
+        float r = Random.Range(0.3f,1.7f);
+        if (r > 1.0f)
         {
-            for (int x = 0; x <= meshSize * 10; x+=10)
+            //scale = scale * 2;
+        }
+
+        float r2 = Random.Range(1.5f, 2f);
+
+
+        Debug.Log(r);
+        int i = 0;
+        for (int z = 0; z <= meshSize * 20; z+= 20)
+        {
+            for (int x = 0; x <= meshSize * 20; x+= 20)
             {
                 
                 //float y1 = Mathf.PerlinNoise(x * 0.001f, z * 0.001f) * 10f;
-                float y2 = Mathf.PerlinNoise(x * 0.05f, z* 0.05f) * (r * 30.0f);
-                float y3 = Mathf.PerlinNoise(x/10 * .3f, z/10 * .3f) * 4f;
+                //float y2 = Mathf.PerlinNoise((float)x / meshSize * scale, (float)z / meshSize * scale);
 
+                float y3 = Mathf.PerlinNoise(x/r * 0.0003f, z/r * 0.0003f) * scale;
+                float y2 = Mathf.PerlinNoise(x / r2 * 0.0003f, z / r2 * 0.0003f);
+                float y1 = Mathf.PerlinNoise(x * r * 0.000005f, z * r * 0.000005f) * scale;
+                //float y2 = Mathf.PerlinNoise(x / scale * .03f, z / scale * .03f) + offsetY;
 
+                
 
                 //loat ny = ((y1 * y3) + y2) / 3;
                 //float ny = y1 * y2 * y3 / 3;
                 float ny = y2 * y3 / 2;
+                /*if (ny < 0)
+                {
+                    ny = 0.0f;
+                }*/
                 verts[i] = new Vector3(x, ny, z);
                 i++;
             }
