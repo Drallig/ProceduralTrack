@@ -9,6 +9,7 @@ public class MeshGenerator : MonoBehaviour
     public int meshSizeZ = 20;
     public float scale = 1;
 
+    public int triSize = 5;
     Mesh mesh;
 
     Vector3[] verts;
@@ -50,9 +51,9 @@ public class MeshGenerator : MonoBehaviour
         /*
          * ## Loops for construction of terrain mesh, including noise for height of the terrain
          */
-        for (int z = 0, i = 0; z <= meshSizeZ * 20; z+= 20)
+        for (int z = 0, i = 0; z <= meshSizeZ * triSize; z+= triSize)
         {
-            for (int x = 0; x <= meshSizeX * 20; x+= 20)
+            for (int x = 0; x <= meshSizeX * triSize; x+= triSize)
             {
                 
                 //float y1 = Mathf.PerlinNoise(x * 0.001f, z * 0.001f) * 10f;
