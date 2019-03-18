@@ -191,7 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55ab5c951324eda45b232ac5704801cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Position: {x: 10, y: 0, z: -10}
+  Position: {x: 10, y: 0, z: -20}
   nextPoint: {fileID: 0}
   lastPoint: {fileID: 0}
   n: {fileID: 0}
@@ -768,7 +768,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55ab5c951324eda45b232ac5704801cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Position: {x: 0, y: 0, z: 0}
+  Position: {x: 20, y: 0, z: 10}
   nextPoint: {fileID: 0}
   lastPoint: {fileID: 0}
   n: {fileID: 0}
