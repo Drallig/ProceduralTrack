@@ -112,13 +112,12 @@ public class TrackGenerator : MonoBehaviour
             }
             Vector3 midP = new Vector3((t.Position.x + next.Position.x) / 2, 0, (t.Position.z + next.Position.z) / 2); //position vector between 2 points
             GameObject test = newOb;
-            Debug.Log(midP);
             test.transform.position = midP; //move test to mid point postion
             test.transform.LookAt(next.transform.position); //make test look at the next point
-            test.transform.position = midP + test.transform.right * halfTrackWidth; //move test to right of current point
+            test.transform.position = midP + (test.transform.right * halfTrackWidth); //move test to right of current point
             Vector3 rightPoint = test.transform.position; //set right point as current test point
             verts[currentPoint] = rightPoint;
-            test.transform.position = midP + -test.transform.right * halfTrackWidth; //move test to left of mid poitn
+            test.transform.position = midP + (-test.transform.right * halfTrackWidth); //move test to left of mid poitn
             Vector3 leftPoint = test.transform.position; //set left point as current test postion
             verts[currentPoint + 1] = leftPoint;
             currentPoint += 2;
