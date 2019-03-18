@@ -13,6 +13,7 @@ public class MeshGenerator : MonoBehaviour
     Mesh mesh;
 
     Vector3[] verts;
+    Vector2[] uvs;
 
     int[] tris;
 
@@ -118,6 +119,17 @@ public class MeshGenerator : MonoBehaviour
 
         }
 
+        uvs = new Vector2[verts.Length];
+
+        for (int z = 0, i = 0; z <= meshSizeZ; z++)
+        {
+            for (int x = 0; x <= meshSizeX; x++)
+            {
+                uvs[i] = new Vector2((float)x / meshSizeX, (float)z / meshSizeZ);
+                i++;
+            }
+        }
+
         cols = new Color[verts.Length];
 
         for (int i = 0, z = 0; z <= meshSizeZ; z++)
@@ -139,7 +151,7 @@ public class MeshGenerator : MonoBehaviour
         mesh.Clear();
         mesh.vertices = verts;
         mesh.triangles = tris;
-        mesh.colors = cols;
+        mesh.uv = uvs;
 
         mesh.RecalculateNormals();
     }
