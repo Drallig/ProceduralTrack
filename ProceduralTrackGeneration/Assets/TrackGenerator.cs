@@ -20,7 +20,6 @@ public class TrackGenerator : MonoBehaviour
         mesh = new Mesh();
 
         GetComponent<MeshFilter>().mesh = mesh;
-        Debug.Log("rolling");
         newMethod();
         UpdateMesh();
     }
