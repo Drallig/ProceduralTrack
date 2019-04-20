@@ -7,7 +7,9 @@ public class NodeGrid : MonoBehaviour
     public Vector2 gridSize;
     Node[,] grid;
     public int cornerNum = 15;
-    public Vector2[] cornerPos;
+    public List<Node> cornerPos;
+    Node endOfStraight, startOfStraight;
+    public Node[] cornerOrder;
 
     private void OnDrawGizmos()
     {
@@ -15,10 +17,12 @@ public class NodeGrid : MonoBehaviour
     }
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
-        cornerPos = new Vector2[cornerNum];
+        //cornerPos = new Vector2[cornerNum];
         setCorners();
+        setStartFinishStraight();
+
         grid = new Node[(int)gridSize.x, (int)gridSize.y];
         for (int y = 0; y < gridSize.y; y++)
         {
@@ -28,13 +32,15 @@ public class NodeGrid : MonoBehaviour
                 grid[x, y] = new Node(nPos, true);
             }
         }
-	}
-	
-	// Update is called once per frame
-	void Update ()
+        cornerOrder = new Node[cornerNum + 2];
+        cornerNodeOrder();
+    }
+
+    // Update is called once per frame
+    void Update()
     {
-		
-	}
+
+    }
 
     List<Node> getNeighbours(Node node)
     {
@@ -70,8 +76,30 @@ public class NodeGrid : MonoBehaviour
             int _x = Random.Range(0, 200);
             int _y = Random.Range(0, 200);
 
-            cornerPos[i] = new Vector2(_x, _y);
+            if (_y < 100)
+            {
+                int diff = 100 - _y;
+
+                _y += Random.Range(diff-20, diff + 30);
+            }
+
+            if (_y == 100)
+            {
+                _y += Random.Range(30, 60);
+            }
+
+            cornerPos.Add(grid[_x, _y]);
         }
+
+
+    }
+
+    void setStartFinishStraight() //sets the start finish straight in the center of the map, traveling right to left
+    {
+        int finishX = Random.Range(50, 75);
+        int startX = Random.Range(125, 150);
+        startOfStraight = grid[startX, 100];
+        endOfStraight = grid[finishX, 100];
     }
 
     void findPath(Vector2 startPos, Vector2 endPos)
@@ -156,6 +184,83 @@ public class NodeGrid : MonoBehaviour
         //Alright you furr burger heres what you are going to do:
         //create a list path from point to point on the track.
         //create a list. any time you traverse to a new node, add the old node to this list. (prevent overlap)
-        //alter algorithm that if node is in "trackposition" list, it can not use it and must move on to another neighbor
+        //alter algorithm that if node is in "trackposition" list(see previous create list line), it can not use it and must move on to another neighbor
     }
+
+    void cornerNodeOrder() //creates an ordered list of nodes that are then to be pathfound between.
+    {
+        cornerOrder[0] = startOfStraight;
+        cornerOrder[1] = endOfStraight;
+
+
+
+        List<Node> FirstCorner = new List<Node>();
+
+        foreach (Node n in cornerPos)
+        {
+            if (n.Position.y < 100)
+            {
+                FirstCorner.Add(n);
+                cornerPos.Remove(n);
+            }
+        }
+
+        if (FirstCorner != null)
+        {
+            int firstCornerX = (int)endOfStraight.Position.x;
+            if (FirstCorner.Capacity < 2)
+            {
+                cornerOrder[3] = FirstCorner[0];
+            }
+            else
+            {
+                int currentChoice = 0;
+                int lowestValue = 0;
+                int distanceValue = 100;
+                foreach (Node n in FirstCorner)
+                {
+                    int distX = Mathf.Abs(firstCornerX - (int)n.Position.x);
+                    if (distX < distanceValue)
+                    {
+                        distanceValue = distX;
+                        lowestValue = currentChoice;
+                    }
+                    else
+                    {
+                        currentChoice++;
+                    }
+                }
+
+
+            }
+
+            //cornerOrder[2] = FirstCorner.
+        }
+        else
+        {
+
+        }
+
+        int listPos = 0;
+        int listPosOfShortest;
+        int curDistance = 1000;
+
+        for (int i = 2; i < cornerNum + 2; i++)
+        {
+            int startVal = i - 1;
+
+            foreach (Node n in cornerPos)
+            {
+                int newDist = getDist(cornerOrder[startVal], n);
+                if (newDist < curDistance)
+                {
+                    curDistance = newDist;
+                    listPosOfShortest = listPos;
+                }
+                listPos++;
+            }
+
+        }
+    }
+
 }
