@@ -7,19 +7,30 @@ public class NodeGrid : MonoBehaviour
     public Vector2 gridSize;
     Node[,] grid;
     public int cornerNum = 15;
+    int cornerCounter = 0;
     public List<Node> cornerPos;
     Node endOfStraight, startOfStraight;
     public Node[] cornerOrder;
 
+    int distanceValue = 100;
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireCube(transform.position, new Vector3(gridSize.x, 1, gridSize.y));
+        Gizmos.color = Color.red;
+        for(int i = 1; i < cornerNum + 3; i++)
+        {
+            Gizmos.DrawSphere(cornerOrder[i-1].Position, 1);
+            //Gizmos.DrawLine(cornerOrder[i - 1].Position, cornerOrder[i - 1].Position);
+        }
+
     }
 
     // Use this for initialization
     void Start()
     {
-        //cornerPos = new Vector2[cornerNum];
+        cornerPos = new List<Node>();
+        cornerOrder = new Node[cornerNum + 2];
         setCorners();
         setStartFinishStraight();
 
@@ -32,8 +43,25 @@ public class NodeGrid : MonoBehaviour
                 grid[x, y] = new Node(nPos, true);
             }
         }
-        cornerOrder = new Node[cornerNum + 2];
         cornerNodeOrder();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //retracePath()
     }
 
     // Update is called once per frame
@@ -80,15 +108,17 @@ public class NodeGrid : MonoBehaviour
             {
                 int diff = 100 - _y;
 
-                _y += Random.Range(diff-20, diff + 30);
+                _y += Random.Range(diff-5, diff + 30);
             }
 
             if (_y == 100)
             {
                 _y += Random.Range(30, 60);
             }
-
-            cornerPos.Add(grid[_x, _y]);
+            Vector2 nPos = new Vector2(_x, _y);
+            Node n = new Node(nPos, true);
+            Debug.Log(_x + ",  "+ _y);
+            cornerPos.Add(n);
         }
 
 
@@ -98,8 +128,8 @@ public class NodeGrid : MonoBehaviour
     {
         int finishX = Random.Range(50, 75);
         int startX = Random.Range(125, 150);
-        startOfStraight = grid[startX, 100];
-        endOfStraight = grid[finishX, 100];
+        startOfStraight = new Node(new Vector2(startX, 100), true);
+        endOfStraight = new Node(new Vector2(finishX, 100), true);
     }
 
     void findPath(Vector2 startPos, Vector2 endPos)
@@ -189,77 +219,133 @@ public class NodeGrid : MonoBehaviour
 
     void cornerNodeOrder() //creates an ordered list of nodes that are then to be pathfound between.
     {
-        cornerOrder[0] = startOfStraight;
-        cornerOrder[1] = endOfStraight;
+        cornerCounter = 0;
+        cornerOrder[cornerCounter] = startOfStraight;
+        cornerCounter++;
+        cornerOrder[cornerCounter] = endOfStraight;
+        cornerCounter++;
 
 
+        List<Node> firstCorner = new List<Node>();
 
-        List<Node> FirstCorner = new List<Node>();
-
-        foreach (Node n in cornerPos)
+        for(int n = 0; n < cornerOrder.Length; n++ )
         {
-            if (n.Position.y < 100)
+            Debug.Log(n);
+            if (cornerPos[n].Position.y < 100 && cornerPos[n].Position.x < ((startOfStraight.Position.x - endOfStraight.Position.x)/2))
             {
-                FirstCorner.Add(n);
-                cornerPos.Remove(n);
+                firstCorner.Add(cornerPos[n]);
+                cornerPos.Remove(cornerPos[n]);
             }
         }
 
-        if (FirstCorner != null)
+        foreach (Node toRemove in firstCorner)
         {
-            int firstCornerX = (int)endOfStraight.Position.x;
-            if (FirstCorner.Capacity < 2)
+            Debug.Log(toRemove.Position + " got cucked");
+            cornerPos.Remove(toRemove);
+        }
+
+        if (firstCorner.Count > 0)
+        {
+            int turnOne = (int)endOfStraight.Position.x;
+            if (firstCorner.Count < 2)
             {
-                cornerOrder[3] = FirstCorner[0];
+                cornerOrder[cornerCounter] = firstCorner[0];
+                cornerCounter++;
             }
             else
             {
-                int currentChoice = 0;
-                int lowestValue = 0;
-                int distanceValue = 100;
-                foreach (Node n in FirstCorner)
+                while (firstCorner.Count > 0)
                 {
-                    int distX = Mathf.Abs(firstCornerX - (int)n.Position.x);
-                    if (distX < distanceValue)
+                    Debug.Log(firstCorner.Count);
+                    int currentChoice = 0;
+                    int lowestChoice = 0;
+                    int lowestValue = 0;
+                    distanceValue = 1000;
+                    foreach (Node n in firstCorner)
                     {
-                        distanceValue = distX;
-                        lowestValue = currentChoice;
+                        int distX = Mathf.Abs(turnOne - (int)n.Position.x);
+                        if (distX < distanceValue)
+                        {
+                            distanceValue = distX;
+                            lowestValue = currentChoice;
+                            lowestChoice = currentChoice;
+                        }
+                        else
+                        {
+                            currentChoice++;
+                        }
                     }
-                    else
-                    {
-                        currentChoice++;
-                    }
+                    Debug.Log(cornerCounter);
+                    cornerOrder[cornerCounter] = firstCorner[lowestChoice];
+                    cornerCounter++;
+                    firstCorner.Remove(firstCorner[lowestChoice]);
                 }
-
-
             }
 
             //cornerOrder[2] = FirstCorner.
         }
-        else
-        {
 
+        //finds the closest point from the end of the straight, and adds that to the order. So that the turns will be left if less than 100, right if they arent.
+        { 
+            int distConsider = 1000;
+            int listAcc = 0;
+            int listPosAcc = 0;
+            foreach (Node N in cornerPos)
+            {
+                int nDist = getDist(N, endOfStraight);
+                if (nDist < distConsider)
+                {
+                    distConsider = nDist;
+                    listPosAcc = listAcc;
+                }
+                listAcc++;
+            }
+            
+            cornerOrder[cornerCounter] = cornerPos[listPosAcc];
+            cornerCounter++;
+            cornerPos.Remove(cornerPos[listPosAcc]);
         }
 
-        int listPos = 0;
-        int listPosOfShortest;
-        int curDistance = 1000;
 
-        for (int i = 2; i < cornerNum + 2; i++)
+
+
+        int listPosOfShortest = 0;
+        distanceValue = 1000;
+
+        for (int i = cornerCounter; i < cornerNum + 2; i++)
         {
-            int startVal = i - 1;
-
+            //int startVal = i;
+            int listPos = 0;
             foreach (Node n in cornerPos)
             {
-                int newDist = getDist(cornerOrder[startVal], n);
-                if (newDist < curDistance)
+                //if(i != startVal)
                 {
-                    curDistance = newDist;
-                    listPosOfShortest = listPos;
-                }
-                listPos++;
-            }
+                    int newDist = getDist(cornerOrder[cornerCounter-1], n); //its cornercounter -1 since 
+                    if (newDist < distanceValue)
+                    {
+                        distanceValue = newDist;
+                        listPosOfShortest = listPos;
+                    }
+                    
+                    listPos++;
 
+                }
+            }
+            if (cornerPos[0] == null)
+            {
+                Debug.Log("we looping bois");
+            }
+            cornerOrder[cornerCounter] = cornerPos[listPosOfShortest];
+            cornerPos.Remove(cornerPos[listPosOfShortest]);
+            cornerCounter++;
+
+        }
+        Debug.Log("we here");
+        int lol = 0;
+        foreach (Node Complete in cornerOrder)
+        {
+            Debug.Log("Position " + lol +" = " + Complete.Position);
+            lol++;
         }
     }
 
