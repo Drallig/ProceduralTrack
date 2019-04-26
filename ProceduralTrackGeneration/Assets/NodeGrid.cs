@@ -119,10 +119,10 @@ public class NodeGrid : MonoBehaviour
             }
             Vector2 nPos = new Vector2(_x, _y);
             Node n = new Node(nPos, true);
-            //Debug.Log(_x + ",  "+ _y);
+            Debug.Log(_x + ",  "+ _y);
             cornerPos.Add(n);
         }
-
+        
 
     }
 
@@ -237,7 +237,7 @@ public class NodeGrid : MonoBehaviour
         List<Node> lastCorner = new List<Node>();
         //Debug.Log("fc");
         List<Node> tempList = new List<Node>();
-
+        List<Node> orderedLastCorner = new List<Node>();
 
 
         //Following part contains algorithm for defining the first corners
@@ -333,7 +333,7 @@ public class NodeGrid : MonoBehaviour
 
         //following part contains algorithm for defining the final corners
         {
-            for (int n = cornerCounter; n < cornerPos.Count; n++)
+            for (int n = 0; n < cornerPos.Count; n++)
             {
                 //Debug.Log(n);
                 if (cornerPos[n].Position.x > startOfStraight.Position.x - 10)
@@ -346,14 +346,15 @@ public class NodeGrid : MonoBehaviour
 
             foreach (Node toRemove in tempList)
             {
+                lastCorner.Add(toRemove);
                 cornerPos.Remove(toRemove);
                 //cornerOrder[cornerCounter] = toRemove;
-                lastCorner.Add(toRemove);
                 //cornerCounter++;
             }
+
             int lastCornerAcc = 0;
 
-            List<Node> orderedLastCorner = new List<Node>();
+            Debug.Log(lastCorner.Count);
             while (lastCorner.Count > 0)
             {
                 //Debug.Log(firstCorner.Count);
@@ -362,53 +363,49 @@ public class NodeGrid : MonoBehaviour
                 //int lowestValue = 0;
                 distanceValue = 10000;
                 //if (lastCorner.Count >= 2)
+                foreach (Node n in lastCorner)
                 {
-                    
-                    foreach (Node n in lastCorner)
+                    int distX = 0;
+                    if (lastCornerAcc < 1)
                     {
-                        int distX;
-                        if (lastCornerAcc == 0)
-                        
-                        {
-                            distX = getDist(startOfStraight, n);
-                        }
-                        else
-                        {
-                            distX = getDist(orderedLastCorner[lastCornerAcc - 1], n);
-                            //Debug.Log("distX = " + distX);
-                        }
-                        //
-                        //
-                        if (distX < distanceValue)
-                        {
-                            distanceValue = distX;
-                            //lowestValue = currentChoice;
-                            lowestChoice = currentChoice;
-                        }
-                        currentChoice++;
+                        distX = getDist(startOfStraight, n);
                     }
-                    orderedLastCorner[lastCornerAcc] = lastCorner[lowestChoice];
-                    lastCorner.Remove(orderedLastCorner[lastCornerAcc]);
-                    lastCornerAcc++;
-                    //Debug.Log(cornerCounter);
-                    //cornerOrder[cornerCounter] = firstCorner[lowestChoice];
-                    //cornerCounter++;
-                    //firstCorner.Remove(firstCorner[lowestChoice]);
+                    else
+                    {
+                        Debug.Log(lastCornerAcc);
+                        distX = getDist(orderedLastCorner[lastCornerAcc -1], n);
+                        //Debug.Log("distX = " + distX);
+                    }
+                    //
+                    //
+                    if (distX < distanceValue)
+                    {
+                        distanceValue = distX;
+                        //lowestValue = currentChoice;
+                        lowestChoice = currentChoice;
+                    }
+                    currentChoice++;
+
                 }
-                //else
-                {
-                    //Debug.Log("im breaking lmao");
-                    //Debug.Log(firstCorner[0]);
-                    //cornerOrder[cornerCounter] = firstCorner.;
-                    //cornerCounter++;
-                }
+                lastCornerAcc++;
+                orderedLastCorner.Add(lastCorner[lowestChoice]);
+                lastCorner.Remove(lastCorner[lowestChoice]);
+                //cornerPos.Remove(orderedLastCorner[lastCornerAcc]);
+                //Debug.Log(cornerCounter);
+                //cornerOrder[cornerCounter] = firstCorner[lowestChoice];
+                //cornerCounter++;
+                //firstCorner.Remove(firstCorner[lowestChoice]);
             }
 
+            orderedLastCorner.Reverse();
+            orderedLastCorner.Remove(startOfStraight);
+            //Debug.Log("hopefully " + orderedLastCorner.Count + " "+ cornerPos.Count + "makes");
         }
 
-        //finds the closest point from the end of the straight, and adds that to the order. So that the turns will be left if less than 100, right if they arent.
+        //finds the closest point from the end of the straight, and adds that to the order.
         { 
-            int distConsider = 1000;
+            /*
+            int distConsider = 10000;
             int listAcc = 0;
             int listPosAcc = 0;
             foreach (Node N in cornerPos)
@@ -422,29 +419,31 @@ public class NodeGrid : MonoBehaviour
                 listAcc++;
             }
             
+            //if()
             cornerOrder[cornerCounter] = cornerPos[listPosAcc];
             cornerCounter++;
             cornerPos.Remove(cornerPos[listPosAcc]);
+            */
         }
-
-
 
 
         int listPosOfShortest = 0;
         distanceValue = 1000;
+        int cpCount = cornerPos.Count;
+        Debug.Log(cpCount);
 
-        for (int i = cornerCounter; i < cornerNum + 2; i++)
+        for (int i = 0; i < cpCount; i++)
         {
             //int startVal = i;
             int listPos = 0;
             listPosOfShortest = 0;
             distanceValue = 1000;
-            int newDistEnd = getDist(cornerOrder[i - 1], startOfStraight);
+            int newDistEnd = getDist(cornerOrder[cornerCounter - 1], startOfStraight);
             foreach (Node n in cornerPos)
             {
                 //if(i != startVal)
                 {
-                    int newDistCorn = getDist(cornerOrder[i-1], n); //its cornercounter -1 since 
+                    int newDistCorn = getDist(cornerOrder[cornerCounter-1], n); //its cornercounter -1 since 
 
                     if (newDistCorn < distanceValue && newDistCorn < newDistEnd)
                     {
@@ -461,29 +460,70 @@ public class NodeGrid : MonoBehaviour
 
                 }
             }
-            if (cornerPos[0] == null)
+
+            if (cornerPos.Count > 0)
             {
                 Debug.Log("we looping bois");
+                cornerOrder[cornerCounter] = cornerPos[listPosOfShortest];
+                cornerPos.Remove(cornerPos[listPosOfShortest]);
+                cornerCounter++;
+            }
+            else
+            {
+                Debug.Log("BROKEN HERE");
             }
             //Debug.Log(cornerOrder[cornerCounter]);
+            Debug.Log(i);
             //Debug.Log(cornerPos);
-            //Debug.Log(listPosOfShortest);
+            Debug.Log(listPosOfShortest);
+            Debug.Log(cornerPos.Count);
             //Debug.Log(cornerPos[listPosOfShortest]);
-            cornerOrder[cornerCounter] = cornerPos[listPosOfShortest];
-            cornerPos.Remove(cornerPos[listPosOfShortest]);
-            cornerCounter++;
+            //Debug.Log()
+
 
         }
 
 
-
+        /*
         Debug.Log("we here");
         int lol = 0;
         foreach (Node Complete in cornerOrder)
         {
             Debug.Log("Position " + lol +" = " + Complete.Position);
             lol++;
+        }*/
+
+        foreach (Node n in orderedLastCorner)
+        {
+            Debug.Log("do we make it?");
+            Debug.Log("corner counter = " + cornerCounter);
+            cornerOrder[cornerCounter] = n;
+            cornerCounter++;
+        }
+
+        orderedLastCorner.Clear();
+
+        Debug.Log(cornerOrder.Length);
+
+        int lol = 0;
+        foreach (Node Complete in cornerOrder)
+        {
+            Debug.Log("Position " + lol + " = " + Complete.Position);
+            lol++;
         }
     }
 
+    Vector3[] getMeshPath(Node[] nArray)
+    {
+        Vector3[] toReturn = new Vector3[nArray.Length];
+
+        for (int i = 0; i < nArray.Length; i++)
+        {
+            Vector3 nextPoint = new Vector3(nArray[i].Position.x, 0.0f, nArray[i].Position.y);
+
+            toReturn[i] = nextPoint;
+        }
+
+        return toReturn;
+    }
 }
