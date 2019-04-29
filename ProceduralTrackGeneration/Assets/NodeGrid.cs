@@ -14,7 +14,7 @@ public class NodeGrid : MonoBehaviour
 
     int distanceValue = 100;
 
-
+    public List<Node> fullNodeList;
 
     // Use this for initialization
     void Start()
@@ -97,7 +97,7 @@ public class NodeGrid : MonoBehaviour
         }
 
         return neighbours;
-    }
+    } //gets a nodes neighbors.
 
     void setCorners()
     {
@@ -124,7 +124,7 @@ public class NodeGrid : MonoBehaviour
         }
         
 
-    }
+    } //sets the position of the corners for the track algorithm
 
     void setStartFinishStraight() //sets the start finish straight in the center of the map, traveling right to left
     {
@@ -134,10 +134,10 @@ public class NodeGrid : MonoBehaviour
         endOfStraight = new Node(new Vector2(finishX, 100), true);
     }
 
-    void findPath(Vector2 startPos, Vector2 endPos)
+    void findPath(Node startPos, Node endPos)
     {
-        Node initialNode = grid[(int)startPos.x, (int)startPos.y];
-        Node targetNode = grid[(int)endPos.x, (int)endPos.y];
+        Node initialNode = startPos;
+        Node targetNode = endPos;
 
         List<Node> openList = new List<Node>();
         List<Node> closedList = new List<Node>();
@@ -203,7 +203,7 @@ public class NodeGrid : MonoBehaviour
             return 14 * distX + 10 * (distY - distX);
         }
             
-    }
+    } //gets the distance between 2 different nodes
 
     void retracePath(Node start, Node end)
     {
@@ -217,7 +217,10 @@ public class NodeGrid : MonoBehaviour
         }
         path.Reverse();
 
-
+        foreach (Node n in path)
+        {
+            fullNodeList.Add(n);
+        }
         //Alright you furr burger heres what you are going to do:
         //create a list path from point to point on the track.
         //create a list. any time you traverse to a new node, add the old node to this list. (prevent overlap)
@@ -510,6 +513,28 @@ public class NodeGrid : MonoBehaviour
         {
             Debug.Log("Position " + lol + " = " + Complete.Position);
             lol++;
+        }
+    }
+
+    void setConnectedPath()
+    {
+        for (int i = 1; i <= cornerOrder.Length; i++)
+        {
+            Node nod1;
+            Node nod2;
+            if (i < cornerOrder.Length)
+            {
+                nod1 = cornerOrder[i - 1];
+                nod2 = cornerOrder[i];
+
+                findPath(nod1, nod2);
+            }
+            else if (i == cornerOrder.Length)
+            {
+                nod1 = cornerOrder[i];
+                nod2 = cornerOrder[0];
+                findPath(nod1, nod2);
+            }
         }
     }
 
