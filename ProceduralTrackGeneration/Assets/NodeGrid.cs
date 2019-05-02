@@ -11,15 +11,21 @@ public class NodeGrid : MonoBehaviour
     public List<Node> cornerPos;
     Node endOfStraight, startOfStraight;
     public Node[] cornerOrder;
+    public bool newBool;
+
 
     int distanceValue = 100;
 
     public List<Node> fullNodeList;
 
+    public Vector3[] nodePositions;
+
+
     // Use this for initialization
     void Start()
     {
         cornerPos = new List<Node>();
+        fullNodeList = new List<Node>();
         cornerOrder = new Node[cornerNum + 2];
         setCorners();
         setStartFinishStraight();
@@ -35,41 +41,42 @@ public class NodeGrid : MonoBehaviour
         }
         cornerNodeOrder();
 
+        setConnectedPath();
 
+        nodePositions = new Vector3[fullNodeList.Count];
+        nodePositions = getMeshPath(fullNodeList);
 
+        //retracePath(startOfStraight, endOfStraight);
 
+        //retracePath(endOfStraight, startOfStraight);
 
+        //Need to add main straight to fullNodeList
+        //need to pass positions(at factor 10) to mesh gen
 
-
-
-
-
-
-
-
-
-
-
-
-        //retracePath()
     }
 
     private void OnDrawGizmos()
     {
+        /*
         Gizmos.DrawWireCube(transform.position, new Vector3(gridSize.x, 1, gridSize.y));
-        Gizmos.color = Color.red;
-        for (int i = 1; i < cornerNum + 2; i++)
+        Gizmos.color = Color.blue;
+        for (int i = 0; i < fullNodeList.Count; i++)
         {
-            Gizmos.DrawSphere(cornerOrder[i - 1].Position, 1);
-            Gizmos.DrawLine(cornerOrder[i - 1].Position, cornerOrder[i].Position);
-        }
+            Gizmos.DrawSphere(new Vector3(fullNodeList[i].Position.x * 10, 101, fullNodeList[i].Position.y * 10), 3);
+            //Gizmos.DrawLine(cornerOrder[i - 1].Position, cornerOrder[i].Position);
+        }*/
 
-    }
+    } //Draw Gizmos function
 
     // Update is called once per frame
     void Update()
     {
+        if (newBool == true)
+        {
+            setConnectedPath();
+        }
 
+        //Debug.Log(fullNodeList);
     }
 
     List<Node> getNeighbours(Node node)
@@ -98,6 +105,22 @@ public class NodeGrid : MonoBehaviour
 
         return neighbours;
     } //gets a nodes neighbors.
+
+    int getDist(Node n1, Node n2)
+    {
+        int distX = Mathf.Abs((int)n1.Position.x - (int)n2.Position.x);
+        int distY = Mathf.Abs((int)n1.Position.y - (int)n2.Position.y);
+
+        if (distX > distY)
+        {
+            return 14 * distY + 10 * (distX - distY);
+        }
+        else
+        {
+            return 14 * distX + 10 * (distY - distX);
+        }
+
+    } //gets the distance between 2 different nodes
 
     void setCorners()
     {
@@ -140,27 +163,31 @@ public class NodeGrid : MonoBehaviour
         Node targetNode = endPos;
 
         List<Node> openList = new List<Node>();
-        List<Node> closedList = new List<Node>();
+        HashSet<Node> closedList = new HashSet<Node>();
+
         openList.Add(initialNode);
 
-        while (openList.Count > 0)
+        int p = 0;
+        while (targetNode.Parent == null)
+        //while (openList.Count > 0)
         {
             Node currentNode = openList[0];
-            for (int i = 0; i < openList.Count; i++)
+            for (int i = 1; i < openList.Count; i++)
             {
                 if (openList[i].fCost < currentNode.fCost || openList[i].fCost == currentNode.fCost && openList[i].hCost < currentNode.hCost)
                 {
                     currentNode = openList[i];
-                    
                 }
             }
 
             openList.Remove(currentNode);
             closedList.Add(currentNode);
 
-            if (currentNode == targetNode)
+            if (currentNode.Position == endPos.Position)
             {
-
+                endPos.Parent = currentNode.Parent;
+                retracePath(startPos, endPos);
+                newBool = false;
                 return;
             }
 
@@ -177,7 +204,6 @@ public class NodeGrid : MonoBehaviour
                 {
                     neighbour.gCost = newMovCost;
                     neighbour.hCost = getDist(neighbour, targetNode);
-
                     neighbour.Parent = currentNode;
 
                     if (!openList.Contains(neighbour))
@@ -187,28 +213,12 @@ public class NodeGrid : MonoBehaviour
                 }
             }
         }
-    }
-
-    int getDist(Node n1, Node n2)
-    {
-        int distX = Mathf.Abs((int)n1.Position.x - (int)n2.Position.x);
-        int distY = Mathf.Abs((int)n1.Position.y - (int)n2.Position.y);
-
-        if (distX > distY)
-        {
-            return 14 * distY + 10 * (distX - distY);
-        }
-        else
-        {
-            return 14 * distX + 10 * (distY - distX);
-        }
-            
-    } //gets the distance between 2 different nodes
+        
+    } //A* Algorithm, finds path from one node to another
 
     void retracePath(Node start, Node end)
     {
         List<Node> path = new List<Node>();
-
         Node current = end;
         while (current != start)
         {
@@ -216,16 +226,13 @@ public class NodeGrid : MonoBehaviour
             current = current.Parent;
         }
         path.Reverse();
-
+        
         foreach (Node n in path)
         {
             fullNodeList.Add(n);
         }
-        //Alright you furr burger heres what you are going to do:
-        //create a list path from point to point on the track.
-        //create a list. any time you traverse to a new node, add the old node to this list. (prevent overlap)
-        //alter algorithm that if node is in "trackposition" list(see previous create list line), it can not use it and must move on to another neighbor
-    }
+        
+    } //provides the path between nodes
 
     void cornerNodeOrder() //creates an ordered list of nodes that are then to be pathfound between.
     {
@@ -516,9 +523,9 @@ public class NodeGrid : MonoBehaviour
         }
     }
 
-    void setConnectedPath()
+    void setConnectedPath() //connects the paths for the a* algorithm
     {
-        for (int i = 1; i <= cornerOrder.Length; i++)
+        for (int i = 1; i <= cornerOrder.Length + 1; i++)
         {
             Node nod1;
             Node nod2;
@@ -529,26 +536,25 @@ public class NodeGrid : MonoBehaviour
 
                 findPath(nod1, nod2);
             }
-            else if (i == cornerOrder.Length)
-            {
-                nod1 = cornerOrder[i];
-                nod2 = cornerOrder[0];
-                findPath(nod1, nod2);
-            }
         }
+
+        Node Fin1, Fin2;
+        Fin1 = cornerOrder[cornerOrder.Length -1];
+        Fin2 = cornerOrder[0];
+        findPath(Fin1, Fin2);
     }
 
-    Vector3[] getMeshPath(Node[] nArray)
+    Vector3[] getMeshPath(List<Node> nList)
     {
-        Vector3[] toReturn = new Vector3[nArray.Length];
+        Vector3[] toReturn = new Vector3[nList.Count];
 
-        for (int i = 0; i < nArray.Length; i++)
+        for (int i = 0; i < nList.Count; i++)
         {
-            Vector3 nextPoint = new Vector3(nArray[i].Position.x, 0.0f, nArray[i].Position.y);
+            Vector3 nextPoint = new Vector3((nList[i].Position.x * 10), 101.0f, (nList[i].Position.y * 10));
 
             toReturn[i] = nextPoint;
         }
 
         return toReturn;
-    }
+    } //Provides vector3 array to be implemented with mesh generator
 }

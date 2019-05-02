@@ -8,65 +8,100 @@ public class TrackGenerator : MonoBehaviour
     public int tpSize;
     public TrackPoint[] tPoint;
     public float halfTrackWidth = 5;
+    GameObject nodeGrid;
 
     Mesh mesh;
-    public Vector3[] verts;
-    public int[] tris;
+    //public Vector3[] verts;
+    //public int[] tris;
+    Vector3[] nPositions;
+    Vector3[] vertices;
+    int[] triangles;
 
 
     private void Start()
     {
+        nodeGrid = GameObject.FindGameObjectWithTag("NodeGrid");
+        nPositions = nodeGrid.GetComponent<NodeGrid>().nodePositions;
+        vertices = new Vector3[nPositions.Length * 2];
         //tPoint = new TrackPoint[tpSize];
         mesh = new Mesh();
 
         GetComponent<MeshFilter>().mesh = mesh;
-        newMethod();
+        //newMethod();
+        CreateMesh();
         UpdateMesh();
     }
 
+    /*
+    private void OnDrawGizmos()
+    {
+        if (vertices == null)
+            return;
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            Gizmos.DrawSphere(vertices[i], 3f);
+        }
+    }*/
+
     void CreateMesh()
     {
-        int currentPoint = 0;
-        int cVert = 0;
-        int cTris = 0;
-        TrackPoint next = tPoint[currentPoint +1];
-        TrackPoint last = tPoint[tPoint.Length];
+        Vector3 current;
+        Vector3 next;
 
-        verts = new Vector3[(tPoint.Length * 2)];
-
-        for(int i = 0; i<tPoint.Length; i++)
+        int i = 0;
+        for (int n = 0; n < nPositions.Length; n++)
         {
-            TrackPoint t = tPoint[i];
-            //idk
-            Vector3 midD = new Vector3(next.Position.x - t.Position.x, 0, next.Position.z - t.Position.z); //direction vector of connection of points
-            Vector3 midP = new Vector3((t.Position.x + next.Position.x) / 2, 0, (t.Position.z + next.Position.z) / 2); //position vector between 2 points
-            Vector3 midcVec = PerpendicularClockwise(midD) + midP;
-            Vector3 midccVec = PerpendicularCounterClockwise(midD) + midP;
-
-            GameObject test = newOb;
-
-            test.transform.position = midcVec += (transform.forward * 5);
-            Vector3 rightPoint = newOb.transform.position;
-            test.transform.position = midccVec += (transform.forward * 5);
-            Vector3 leftPoint = newOb.transform.position;
-            Debug.Log("rp is " + rightPoint + " which is 5 away from midpoint at " + midcVec);
-
-            //verts[i] = new Vector3()
-
-            currentPoint++;
-            if (currentPoint >= tPoint.Length)
+            current = nPositions[n];
+            Debug.Log(n);
+            if (n + 1 >= nPositions.Length)
             {
-                next = tPoint[0];
-                last = t;
+                next = nPositions[0];
             }
             else
             {
-                next = tPoint[currentPoint+1];
-                last = t;
+                next = nPositions[n + 1];
             }
+            Vector3 midPoint = new Vector3((current.x + next.x) / 2, 101, (current.z + next.z) / 2);
+            GameObject test = newOb;
+            test.transform.position = midPoint; //move test to mid point postion
+            test.transform.LookAt(next); //make test look at the next point
+            test.transform.position = midPoint + (test.transform.right * halfTrackWidth); //move test to right of current point
+            vertices[i] = new Vector3(test.transform.position.x, test.transform.position.y, test.transform.position.z); //set right point as current test point
+            test.transform.position = midPoint + (-test.transform.right * halfTrackWidth); //move test to left of mid point
+            vertices[i+1] = new Vector3(test.transform.position.x, test.transform.position.y, test.transform.position.z); //set left point as current test postion
+            i += 2;
         }
 
+        triangles = new int[(nPositions.Length * 2) * 6];
+        int vert = 0;
+        int tris = 0;
 
+        for (int p = 0; p < vertices.Length; p+= 2)
+        {
+            if (p == vertices.Length -2)
+            {
+                //Debug.Log("here before error");
+                triangles[tris + 0] = vert;
+                triangles[tris + 1] = vert + 1;
+                triangles[tris + 2] = 0;
+                triangles[tris + 3] = vert + 1;
+                triangles[tris + 4] = 1;
+                triangles[tris + 5] = 0;
+            }
+            else
+            {
+                triangles[tris + 0] = vert;
+                triangles[tris + 1] = vert + 1;
+                triangles[tris + 2] = vert + 2;
+                triangles[tris + 3] = vert + 1;
+                triangles[tris + 4] = vert + 3;
+                triangles[tris + 5] = vert + 2;
+            }
+
+            vert+=2;
+            tris += 6;
+        }
+        //vert++;
     }
 
 
@@ -74,8 +109,8 @@ public class TrackGenerator : MonoBehaviour
     {
         mesh.Clear();
 
-        mesh.vertices = verts;
-        mesh.triangles = tris;
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
 
         mesh.RecalculateNormals();
     }
@@ -92,27 +127,28 @@ public class TrackGenerator : MonoBehaviour
         return new Vector3(-vector3.z, 0, vector3.x);
     }
 
+    /*
     void newMethod()
     {
         int currentPoint = 0;
-        TrackPoint next;
-        TrackPoint t;
-        verts = new Vector3[tPoint.Length * 2];
-        for (int i = 0; i<tPoint.Length; i++)
+        Vector3 next;
+        Vector3 t;
+        verts = new Vector3[nPositions.Length * 2];
+        for (int i = 0; i< nPositions.Length; i++)
         {
-            t = tPoint[i];
-            if ((i + 1) >= tPoint.Length)
+            t = nPositions[i];
+            if ((i + 1) >= nPositions.Length)
             {
-                next = tPoint[0];
+                next = nPositions[0];
             }
             else
             {
-                next = tPoint[i + 1];
+                next = nPositions[i + 1];
             }
-            Vector3 midP = new Vector3((t.Position.x + next.Position.x) / 2, 0, (t.Position.z + next.Position.z) / 2); //position vector between 2 points
+            Vector3 midP = new Vector3((t.x + next.x) / 2, 0, (t.z + next.z) / 2); //position vector between 2 points
             GameObject test = newOb;
             test.transform.position = midP; //move test to mid point postion
-            test.transform.LookAt(next.transform.position); //make test look at the next point
+            test.transform.LookAt(next); //make test look at the next point
             test.transform.position = midP + (test.transform.right * halfTrackWidth); //move test to right of current point
             Vector3 rightPoint = test.transform.position; //set right point as current test point
             verts[currentPoint] = rightPoint;
@@ -121,11 +157,12 @@ public class TrackGenerator : MonoBehaviour
             verts[currentPoint + 1] = leftPoint;
             currentPoint += 2;
         }
-        tris = new int[tPoint.Length * 6];
+
+        tris = new int[nPositions.Length * 6];
         int cTris = 0;
         for (int i = 0; i < verts.Length; i+=2)
         {
-            if (i == 14)
+            if (i == verts.Length)
             {
                 //0
                 //1
@@ -161,4 +198,5 @@ public class TrackGenerator : MonoBehaviour
         }
 
     }
+    */
 }
