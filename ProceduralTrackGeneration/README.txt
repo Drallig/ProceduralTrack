@@ -16,3 +16,7 @@ The "New Bool" does nothing, and it is advised the "Node Positions" array is not
 The "Track Mesh" Object:- 
 The "Track Generator" Script, the "Half Track Width" value is the value of half the width of the track. An accurate value would range from 5 - 8(multiplied by 2, 10 - 16)
 The "New Ob" GameObject should not be altered
+
+In order to construct a new generation, the scene must be played, and to reset the generation for a new one, the scene must be stopped and started.
+
+Navigate the scene through the Scene window in unity once the simulation is running to inspect the simulation
