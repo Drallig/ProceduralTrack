@@ -5,8 +5,8 @@ using UnityEngine;
 public class TrackGenerator : MonoBehaviour
 {
     public GameObject newOb;
-    public int tpSize;
-    public TrackPoint[] tPoint;
+    //public int tpSize;
+    //public TrackPoint[] tPoint;
     public float halfTrackWidth = 5;
     GameObject nodeGrid;
 
