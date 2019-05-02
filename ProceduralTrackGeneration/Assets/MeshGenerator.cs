@@ -73,7 +73,7 @@ public class MeshGenerator : MonoBehaviour
                 if (ny < minTer)
                 {
                     minTer = ny;
-                    Debug.Log(minTer);
+                    //Debug.Log(minTer);
                 }
                 i++;
             }

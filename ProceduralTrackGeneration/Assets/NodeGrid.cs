@@ -50,9 +50,6 @@ public class NodeGrid : MonoBehaviour
 
         //retracePath(endOfStraight, startOfStraight);
 
-        //Need to add main straight to fullNodeList
-        //need to pass positions(at factor 10) to mesh gen
-
     }
 
     private void OnDrawGizmos()
@@ -142,7 +139,7 @@ public class NodeGrid : MonoBehaviour
             }
             Vector2 nPos = new Vector2(_x, _y);
             Node n = new Node(nPos, true);
-            Debug.Log(_x + ",  "+ _y);
+            //Debug.Log(_x + ",  "+ _y);
             cornerPos.Add(n);
         }
         
@@ -323,7 +320,6 @@ public class NodeGrid : MonoBehaviour
                         }
                         //else
                         {
-                            //Debug.Log("im breaking lmao");
                             //Debug.Log(firstCorner[0]);
                             //cornerOrder[cornerCounter] = firstCorner.;
                             //cornerCounter++;
@@ -337,7 +333,6 @@ public class NodeGrid : MonoBehaviour
 
         foreach (Node toRemove in firstCorner)
         {
-            Debug.Log(toRemove.Position + " got cucked");
             cornerPos.Remove(toRemove);
         }
 
@@ -364,7 +359,7 @@ public class NodeGrid : MonoBehaviour
 
             int lastCornerAcc = 0;
 
-            Debug.Log(lastCorner.Count);
+            //Debug.Log(lastCorner.Count);
             while (lastCorner.Count > 0)
             {
                 //Debug.Log(firstCorner.Count);
@@ -382,7 +377,7 @@ public class NodeGrid : MonoBehaviour
                     }
                     else
                     {
-                        Debug.Log(lastCornerAcc);
+                        //Debug.Log(lastCornerAcc);
                         distX = getDist(orderedLastCorner[lastCornerAcc -1], n);
                         //Debug.Log("distX = " + distX);
                     }
@@ -440,7 +435,7 @@ public class NodeGrid : MonoBehaviour
         int listPosOfShortest = 0;
         distanceValue = 1000;
         int cpCount = cornerPos.Count;
-        Debug.Log(cpCount);
+        //Debug.Log(cpCount);
 
         for (int i = 0; i < cpCount; i++)
         {
@@ -462,8 +457,7 @@ public class NodeGrid : MonoBehaviour
                     }
                     else
                     {
-                        
-                        Debug.Log("ALGORITHM SHOULD GO HERE AND WERE AT " + cornerCounter);
+
                     }
                     
                     listPos++;
@@ -473,20 +467,19 @@ public class NodeGrid : MonoBehaviour
 
             if (cornerPos.Count > 0)
             {
-                Debug.Log("we looping bois");
                 cornerOrder[cornerCounter] = cornerPos[listPosOfShortest];
                 cornerPos.Remove(cornerPos[listPosOfShortest]);
                 cornerCounter++;
             }
             else
             {
-                Debug.Log("BROKEN HERE");
+
             }
             //Debug.Log(cornerOrder[cornerCounter]);
-            Debug.Log(i);
+            //Debug.Log(i);
             //Debug.Log(cornerPos);
-            Debug.Log(listPosOfShortest);
-            Debug.Log(cornerPos.Count);
+            //Debug.Log(listPosOfShortest);
+            //Debug.Log(cornerPos.Count);
             //Debug.Log(cornerPos[listPosOfShortest]);
             //Debug.Log()
 
@@ -505,20 +498,19 @@ public class NodeGrid : MonoBehaviour
 
         foreach (Node n in orderedLastCorner)
         {
-            Debug.Log("do we make it?");
-            Debug.Log("corner counter = " + cornerCounter);
+            //Debug.Log("corner counter = " + cornerCounter);
             cornerOrder[cornerCounter] = n;
             cornerCounter++;
         }
 
         orderedLastCorner.Clear();
 
-        Debug.Log(cornerOrder.Length);
+        //Debug.Log(cornerOrder.Length);
 
         int lol = 0;
         foreach (Node Complete in cornerOrder)
         {
-            Debug.Log("Position " + lol + " = " + Complete.Position);
+           // Debug.Log("Position " + lol + " = " + Complete.Position);
             lol++;
         }
     }

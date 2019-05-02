@@ -52,7 +52,7 @@ public class TrackGenerator : MonoBehaviour
         for (int n = 0; n < nPositions.Length; n++)
         {
             current = nPositions[n];
-            Debug.Log(n);
+            //Debug.Log(n);
             if (n + 1 >= nPositions.Length)
             {
                 next = nPositions[0];
